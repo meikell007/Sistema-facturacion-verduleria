@@ -1,4 +1,3 @@
-````md
 <div align="center">
 
 # 🌿 Eco Fruver
@@ -56,8 +55,6 @@ Permite registrar ventas en efectivo o a crédito, administrar el catálogo de p
 │  Triggers · Funciones   │
 │  BD: facturacion_barrio │
 └─────────────────────────┘
-````
-
 ---
 
 # 🛠️ Stack Tecnológico
