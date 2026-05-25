@@ -7,6 +7,7 @@ import Products from './views/Products';
 import Sales from './views/Sales';
 import Cartera from './views/Cartera';
 import Reports from './views/Reports';
+import Users from './views/Users';
 import Sidebar from './components/Sidebar';
 import './App.css';
 
@@ -42,18 +43,25 @@ function App() {
     );
   }
 
+  const isAdmin = user?.rol === 'Administrador';
+
   return (
     <BrowserRouter>
       <div className="app-container">
         <Sidebar user={user} theme={theme} toggleTheme={toggleTheme} />
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<Dashboard user={user} />} />
+            <Route path="/"        element={<Dashboard user={user} />} />
             <Route path="/clients" element={<Clients />} />
             <Route path="/products" element={<Products />} />
-            <Route path="/sales" element={<Sales />} />
-            <Route path="/cartera" element={<Cartera />} />
-            <Route path="/reports" element={<Reports />} />
+            <Route path="/sales"   element={<Sales user={user} />} />
+            <Route path="/cartera" element={<Cartera user={user} />} />
+            <Route path="/reports" element={<Reports user={user} />} />
+            {/* Ruta protegida: solo Administrador */}
+            <Route
+              path="/users"
+              element={isAdmin ? <Users user={user} /> : <Navigate to="/" replace />}
+            />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
@@ -63,4 +71,3 @@ function App() {
 }
 
 export default App;
-

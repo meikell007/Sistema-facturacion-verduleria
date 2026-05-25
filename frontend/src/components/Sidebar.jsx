@@ -10,7 +10,8 @@ import {
   FileText, 
   LogOut,
   Sun,
-  Moon
+  Moon,
+  UserCog
 } from 'lucide-react';
 import { logout } from '../services/authService';
 
@@ -87,6 +88,17 @@ export default function Sidebar({ user, theme, toggleTheme }) {
           <FileText size={20} />
           <span>Reportes</span>
         </NavLink>
+
+        {/* Solo administradores pueden gestionar usuarios del sistema */}
+        {isAdmin && (
+          <NavLink 
+            to="/users" 
+            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+          >
+            <UserCog size={20} />
+            <span>Usuarios</span>
+          </NavLink>
+        )}
       </nav>
 
       {/* Control de Tema Claro / Oscuro y Perfil */}
