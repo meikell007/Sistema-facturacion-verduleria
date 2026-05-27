@@ -15,11 +15,26 @@ function App() {
   const [user, setUser] = useState(null);
   const [theme, setTheme] = useState(localStorage.getItem('eco_fruver_theme') || 'light');
 
-  // Check token on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('eco_fruver_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const storedUser  = localStorage.getItem('eco_fruver_user');
+    const storedToken = localStorage.getItem('eco_fruver_token');
+
+    if (storedUser && storedToken) {
+      // Verificar si el JWT expiró leyendo el payload (sin librería)
+      try {
+        const payload = JSON.parse(atob(storedToken.split('.')[1]));
+        const expired = payload.exp && Date.now() / 1000 > payload.exp;
+        if (expired) {
+          localStorage.removeItem('eco_fruver_token');
+          localStorage.removeItem('eco_fruver_user');
+        } else {
+          setUser(JSON.parse(storedUser));
+        }
+      } catch {
+        // Token malformado — limpiar sesión
+        localStorage.removeItem('eco_fruver_token');
+        localStorage.removeItem('eco_fruver_user');
+      }
     }
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);

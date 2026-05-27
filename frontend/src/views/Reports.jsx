@@ -85,7 +85,7 @@ export default function Reports({ user }) {
   const [startDate, setStartDate]     = useState(firstDayOfMonth());
   const [endDate, setEndDate]         = useState(today());
   const [salesData, setSalesData]     = useState(null);
-  const [loadingSales, setLoadingSales] = useState(false);
+  const [loadingSales, setLoadingSales] = useState(true); // true para mostrar cargando al abrir
   const [salesError, setSalesError]   = useState('');
 
   // ── Reporte de deudores ──────────────────────────────────────────────────
@@ -98,12 +98,17 @@ export default function Reports({ user }) {
   const [loadingAudit, setLoadingAudit]   = useState(false);
   const [auditSearch, setAuditSearch]     = useState('');
 
-  // ─── Carga inicial según tab activo ──────────────────────────────────────
+  // ─── Carga inicial: al montar el componente carga el reporte del mes ──────
 
   useEffect(() => {
-    if (activeTab === 'ventas' && !salesData) loadSalesReport();
-    if (activeTab === 'deudores') loadDebtorsReport();
-    if (activeTab === 'auditoria' && isAdmin) loadAuditLogs();
+    // Cargar reporte de ventas automáticamente al abrir la vista (si es admin)
+    if (isAdmin) loadSalesReport();
+    // Cargar deudores siempre (Admin y Cajero lo pueden ver)
+    loadDebtorsReport();
+  }, []); // solo al montar
+
+  useEffect(() => {
+    if (activeTab === 'auditoria' && isAdmin && auditLogs.length === 0) loadAuditLogs();
   }, [activeTab]);
 
   // ─── Loaders ─────────────────────────────────────────────────────────────
@@ -114,7 +119,8 @@ export default function Reports({ user }) {
     try {
       setLoadingSales(true);
       setSalesError('');
-      const data = await getSalesReport(startDate, endDate);
+      // Enviar fechas con T00:00 para forzar interpretación local y evitar bug de zona horaria UTC
+      const data = await getSalesReport(`${startDate}T00:00`, `${endDate}T23:59`);
       setSalesData(data);
     } catch (err) {
       setSalesError(err?.response?.data?.error || 'Error al cargar el reporte de ventas.');
@@ -274,8 +280,16 @@ export default function Reports({ user }) {
             )}
           </div>
 
+          {/* Estado de carga */}
+          {loadingSales && (
+            <div style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+              <RefreshCw size={28} style={{ marginBottom: '12px', opacity: 0.4, animation: 'spin 1s linear infinite' }} />
+              <p style={{ margin: 0 }}>Generando reporte...</p>
+            </div>
+          )}
+
           {/* Tarjetas resumen */}
-          {salesData && (
+          {!loadingSales && salesData && (
             <>
               <div className="stat-grid">
                 <StatCard
