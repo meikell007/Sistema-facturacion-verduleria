@@ -10,8 +10,8 @@ exports.createProduct = async (req, res) => {
       return res.status(400).json({ error: 'Descripción y precio unitario son requeridos.' });
     }
 
-    if (precio_unitario < 0) {
-      return res.status(400).json({ error: 'El precio unitario no puede ser negativo.' });
+    if (!precio_unitario || Number(precio_unitario) <= 0) {
+      return res.status(400).json({ error: 'El precio unitario debe ser mayor a $0.' });
     }
 
     const newProduct = await Product.create({

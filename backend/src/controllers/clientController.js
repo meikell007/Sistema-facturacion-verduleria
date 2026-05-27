@@ -46,8 +46,9 @@ exports.createClient = async (req, res) => {
 // Consultar clientes por filtros (Admin y Cajero)
 exports.getClients = async (req, res) => {
   try {
-    const { search } = req.query;
-    let whereClause = { activo: true };
+    const { search, includeInactive } = req.query;
+    // Por defecto solo activos; con ?includeInactive=true el Admin ve todos
+    let whereClause = includeInactive === 'true' ? {} : { activo: true };
 
     if (search) {
       whereClause[Op.or] = [

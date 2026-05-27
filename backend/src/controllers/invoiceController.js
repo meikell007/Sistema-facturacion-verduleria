@@ -116,9 +116,15 @@ exports.createInvoice = async (req, res) => {
       }
     }
 
-    // 4. Generar número correlativo único de factura
-    const count = await Invoice.count({ transaction: t });
-    const numero_factura = `FAC-${String(count + 1).padStart(6, '0')}`;
+    // 4. Generar número correlativo único de factura usando secuencia PostgreSQL
+    // Usar MAX(id_factura) dentro de la transacción es más seguro que COUNT()
+    // porque COUNT() puede devolver el mismo valor si dos transacciones corren en paralelo.
+    // La secuencia SERIAL de id_factura garantiza unicidad real.
+    const [[{ maxid }]] = await sequelize.query(
+      "SELECT COALESCE(MAX(id_factura), 0) AS maxid FROM facturas",
+      { transaction: t }
+    );
+    const numero_factura = `FAC-${String(Number(maxid) + 1).padStart(6, '0')}`;
 
     // 5. Configurar saldos según método de pago
     const saldo_pendiente = tipo_pago === 'Credito' ? total : 0.00;
